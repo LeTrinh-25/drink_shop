@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chỉnh sửa sản phẩm</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+<div class="container py-4">
+
+  <h1 class="mb-3">Chỉnh sửa sản phẩm</h1>
+
+  <form method="POST" action="/products/admin/edit/<%= product.id %>">
+    <div class="mb-3">
+      <label class="form-label">Tên đồ uống</label>
+      <input type="text" name="name" value="<%= product.name %>" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Giá</label>
+      <input type="number" name="price" value="<%= product.price %>" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Link ảnh</label>
+      <input type="text" name="image" value="<%= product.image %>" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Mô tả</label>
+      <textarea name="description" class="form-control" rows="3"><%= product.description %></textarea>
+    </div>
+
+    <button class="btn btn-warning">Cập nhật</button>
+  </form>
+
+</div>
+</body>
+</html>
