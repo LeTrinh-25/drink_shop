@@ -1,0 +1,10 @@
+<%# Khung layout dùng chung cho mọi trang Admin.
+    Trang con chỉ cần include partial "header" ở đầu file (kèm pageTitle)
+    và include partial "footer" ở cuối file. %>
+<%- include('head') %>
+<%- include('sidebar') %>
+
+<main class="admin-main">
+  <%- include('topbar') %>
+  <div class="admin-content">
+    <%- include('flash') %>

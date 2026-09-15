@@ -1,0 +1,133 @@
+<%- include('../partials/header', { pageTitle: isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }) %>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="/admin/products" class="text-decoration-none">Sản phẩm</a></li>
+    <li class="breadcrumb-item active"><%= isEdit ? 'Chỉnh sửa' : 'Thêm mới' %></li>
+  </ol>
+</nav>
+
+<form method="POST"
+      action="<%= isEdit ? '/admin/products/' + product.id + '/edit' : '/admin/products/create' %>"
+      novalidate>
+  <div class="row g-3">
+
+    <!-- Cột thông tin chính -->
+    <div class="col-12 col-lg-8">
+      <div class="admin-card">
+        <div class="admin-card__header">
+          <h2 class="admin-card__title">
+            <i class="bi bi-cup-straw me-1"></i>Thông tin sản phẩm
+          </h2>
+        </div>
+        <div class="admin-card__body">
+          <div class="row g-3">
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small" for="name">
+                Tên sản phẩm <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="name" name="name"
+                     value="<%= product.name || '' %>" placeholder="Trà sữa trân châu" required>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold small" for="price">
+                Giá bán (VNĐ) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="price" name="price"
+                       value="<%= product.price || 0 %>" min="0" step="1000" required>
+                <span class="input-group-text">đ</span>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold small" for="stock">Tồn kho</label>
+              <input type="number" class="form-control" id="stock" name="stock"
+                     value="<%= product.stock || 0 %>" min="0">
+              <div class="form-text">Tự động trừ khi khách đặt hàng.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold small" for="description">
+                Mô tả <span class="text-danger">*</span>
+              </label>
+              <textarea class="form-control" id="description" name="description" rows="4"
+                        placeholder="Mô tả ngắn về sản phẩm..." required><%= product.description || '' %></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột phụ: ảnh, danh mục, trạng thái -->
+    <div class="col-12 col-lg-4">
+      <div class="admin-card mb-3">
+        <div class="admin-card__header">
+          <h2 class="admin-card__title">Hình ảnh</h2>
+        </div>
+        <div class="admin-card__body">
+          <label class="form-label fw-semibold small" for="image">Đường dẫn ảnh</label>
+          <input type="text" class="form-control" id="image" name="image"
+                 value="<%= product.image || '' %>"
+                 placeholder="/images/tra-sua.jpg"
+                 oninput="document.getElementById('imgPreview').src = this.value">
+          <div class="form-text mb-2">
+            Dùng ảnh trong thư mục <code>public/images</code> (ví dụ <code>/images/tra-sua.jpg</code>)
+            hoặc dán URL đầy đủ.
+          </div>
+          <img id="imgPreview" src="<%= product.image || '' %>" alt="Xem trước"
+               class="img-fluid rounded border"
+               style="max-height:200px;object-fit:cover;width:100%;"
+               onerror="this.style.display='none'"
+               onload="this.style.display='block'">
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card__header">
+          <h2 class="admin-card__title">Phân loại & trạng thái</h2>
+        </div>
+        <div class="admin-card__body">
+          <label class="form-label fw-semibold small" for="category_id">Danh mục</label>
+          <select class="form-select mb-3" id="category_id" name="category_id">
+            <option value="">— Chưa phân loại —</option>
+            <% categories.forEach(function (c) { %>
+              <option value="<%= c.id %>" <%= String(product.category_id) === String(c.id) ? 'selected' : '' %>>
+                <%= c.name %>
+              </option>
+            <% }) %>
+          </select>
+          <% if (categories.length === 0) { %>
+            <div class="alert alert-info py-2 small">
+              Chưa có danh mục nào. <a href="/admin/categories/create">Tạo danh mục</a>
+            </div>
+          <% } %>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch"
+                   id="isActive" name="isActive" <%= product.isActive ? 'checked' : '' %>>
+            <label class="form-check-label" for="isActive">
+              Hiển thị trên trang bán hàng
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nút hành động -->
+    <div class="col-12">
+      <div class="admin-card">
+        <div class="admin-card__body d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i><%= isEdit ? 'Lưu thay đổi' : 'Thêm sản phẩm' %>
+          </button>
+          <a href="/admin/products" class="btn btn-light">Hủy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

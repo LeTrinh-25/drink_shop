@@ -1,0 +1,102 @@
+<%- include('../partials/header', { pageTitle: 'Quản lý danh mục' }) %>
+
+<div class="admin-card">
+  <div class="admin-card__header">
+    <h2 class="admin-card__title">
+      Danh mục <span class="badge bg-light text-secondary ms-1"><%= result.total %></span>
+    </h2>
+    <a href="/admin/categories/create" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Thêm danh mục
+    </a>
+  </div>
+
+  <div class="admin-card__body border-bottom">
+    <form class="filter-bar" method="GET" action="/admin/categories" data-no-loading>
+      <div class="flex-grow-1" style="min-width:200px;">
+        <label class="form-label small text-muted mb-1">Tìm kiếm</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" name="q" value="<%= query.q || '' %>"
+                 placeholder="Tên danh mục...">
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Trạng thái</label>
+        <select class="form-select form-select-sm" name="status" data-auto-submit>
+          <option value="">Tất cả</option>
+          <option value="active"   <%= query.status === 'active' ? 'selected' : '' %>>Đang bật</option>
+          <option value="inactive" <%= query.status === 'inactive' ? 'selected' : '' %>>Đã tắt</option>
+        </select>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a href="/admin/categories" class="btn btn-light btn-sm">Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+
+  <% if (result.items.length === 0) { %>
+    <div class="admin-state">
+      <i class="bi bi-tags"></i>
+      <div class="admin-state__title">Chưa có danh mục nào</div>
+      <p class="small mb-3">Tạo danh mục để phân loại đồ uống (Cà phê, Trà sữa, Bia...).</p>
+      <a href="/admin/categories/create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Thêm danh mục
+      </a>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên danh mục</th>
+            <th class="d-none d-md-table-cell">Mô tả</th>
+            <th>Trạng thái</th>
+            <th class="d-none d-lg-table-cell">Ngày tạo</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% result.items.forEach(function (c) { %>
+            <tr>
+              <td class="text-muted">#<%= c.id %></td>
+              <td class="fw-semibold"><%= c.name %></td>
+              <td class="d-none d-md-table-cell text-muted small text-truncate" style="max-width:320px;">
+                <%= c.description || '—' %>
+              </td>
+              <td>
+                <span class="badge bg-<%= c.isActive ? 'success' : 'secondary' %>">
+                  <%= c.isActive ? 'Đang bật' : 'Đã tắt' %>
+                </span>
+              </td>
+              <td class="d-none d-lg-table-cell text-muted small"><%= formatDate(c.createdAt) %></td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/products?categoryId=<%= c.id %>" class="btn btn-outline-secondary" title="Xem sản phẩm">
+                    <i class="bi bi-box"></i>
+                  </a>
+                  <a href="/admin/categories/<%= c.id %>/edit" class="btn btn-outline-primary" title="Sửa">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="/admin/categories/<%= c.id %>/delete" class="d-inline"
+                        data-confirm="Xóa danh mục &quot;<%= c.name %>&quot;? Các sản phẩm thuộc danh mục này sẽ chuyển thành &quot;Chưa phân loại&quot;.">
+                    <button class="btn btn-outline-danger" type="submit" title="Xóa">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

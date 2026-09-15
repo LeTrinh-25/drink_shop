@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giỏ hàng - Drink Shop</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #f6f6f6; font-family: Arial, sans-serif; }
+    .product-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+    .quantity-btn { width: 32px; height: 32px; padding: 0; }
+    footer { background:#5dade2; color: #fff; padding: 20px 0; margin-top: 50px; }
+    .table td, .table th { vertical-align: middle; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-5">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">🍹 Drink Shop</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+        <li class="nav-item ms-2"><a class="btn btn-warning" href="/cart">Giỏ hàng</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== GIỎ HÀNG ===== -->
+<div class="container">
+  <h1 class="text-center mb-4">Giỏ hàng của bạn</h1>
+
+  <% if (!cart || cart.length === 0) { %>
+    <div class="text-center mt-5">
+      <h4>Giỏ hàng trống.</h4>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table table-bordered bg-white shadow-sm rounded align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Tổng</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cart.forEach(item => { %>
+            <tr>
+              <td><img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="product-img"></td>
+              <td><%= item.product.name %></td>
+              <td class="text-danger fw-bold"><%= item.product.price.toLocaleString() %> VNĐ</td>
+              <td>
+                <a href="/cart/decrease/<%= item.product.id %>" class="btn btn-secondary quantity-btn">-</a>
+                <span class="mx-2"><%= item.quantity %></span>
+                <a href="/cart/increase/<%= item.product.id %>" class="btn btn-secondary quantity-btn">+</a>
+              </td>
+              <td class="text-danger fw-bold"><%= (item.product.price * item.quantity).toLocaleString() %> VNĐ</td>
+              <td>
+                <a href="/cart/delete/<%= item.id %>" class="btn btn-danger btn-sm">Xóa</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tổng tiền và nút Thanh toán -->
+    <div class="d-flex justify-content-end align-items-center mt-4">
+      <h4 class="me-3">Tổng cộng: <span class="text-danger">
+        <%= cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0).toLocaleString() %> VNĐ
+      </span></h4>
+      <a href="/cart/checkout" class="btn btn-success btn-lg">Thanh toán</a>
+    </div>
+  <% } %>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container text-center">
+    <p>📍 Địa chỉ: Đại Học Đông Á</p>
+    <p>📞 Hotline: 0123 456 789</p>
+    <p>© 2025 Drink Shop – Đồ án NestJS</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

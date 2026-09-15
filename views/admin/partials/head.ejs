@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Quản trị' %> · Drink Shop Admin</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- Lớp phủ khi mở sidebar trên mobile -->
+<div class="admin-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Lớp phủ loading -->
+<div class="admin-loading" id="adminLoading">
+  <div class="text-center">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div class="mt-2 text-muted small">Đang xử lý...</div>
+  </div>
+</div>

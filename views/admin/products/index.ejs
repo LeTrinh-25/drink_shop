@@ -1,0 +1,166 @@
+<%- include('../partials/header', { pageTitle: 'Quản lý sản phẩm' }) %>
+
+<div class="admin-card">
+  <div class="admin-card__header">
+    <h2 class="admin-card__title">
+      Sản phẩm <span class="badge bg-light text-secondary ms-1"><%= result.total %></span>
+    </h2>
+    <div class="d-flex gap-2">
+      <a href="/admin/categories" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-tags me-1"></i>Danh mục
+      </a>
+      <a href="/admin/products/create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== Tìm kiếm & lọc ===== -->
+  <div class="admin-card__body border-bottom">
+    <form class="filter-bar" method="GET" action="/admin/products" data-no-loading>
+      <div class="flex-grow-1" style="min-width:190px;">
+        <label class="form-label small text-muted mb-1">Tìm kiếm</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" name="q" value="<%= query.q || '' %>"
+                 placeholder="Tên hoặc mô tả sản phẩm...">
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Danh mục</label>
+        <select class="form-select form-select-sm" name="categoryId" data-auto-submit>
+          <option value="">Tất cả</option>
+          <% categories.forEach(function (c) { %>
+            <option value="<%= c.id %>" <%= String(query.categoryId) === String(c.id) ? 'selected' : '' %>>
+              <%= c.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Trạng thái</label>
+        <select class="form-select form-select-sm" name="status" data-auto-submit>
+          <option value="">Tất cả</option>
+          <option value="active"       <%= query.status === 'active' ? 'selected' : '' %>>Đang bán</option>
+          <option value="inactive"     <%= query.status === 'inactive' ? 'selected' : '' %>>Đã ẩn</option>
+          <option value="out_of_stock" <%= query.status === 'out_of_stock' ? 'selected' : '' %>>Hết hàng</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Sắp xếp</label>
+        <select class="form-select form-select-sm" name="sort" data-auto-submit>
+          <option value=""           <%= !query.sort ? 'selected' : '' %>>Mới nhất</option>
+          <option value="oldest"     <%= query.sort === 'oldest' ? 'selected' : '' %>>Cũ nhất</option>
+          <option value="price_asc"  <%= query.sort === 'price_asc' ? 'selected' : '' %>>Giá tăng dần</option>
+          <option value="price_desc" <%= query.sort === 'price_desc' ? 'selected' : '' %>>Giá giảm dần</option>
+          <option value="name_asc"   <%= query.sort === 'name_asc' ? 'selected' : '' %>>Tên A→Z</option>
+        </select>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a href="/admin/products" class="btn btn-light btn-sm">Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Danh sách ===== -->
+  <% if (result.items.length === 0) { %>
+    <div class="admin-state">
+      <i class="bi bi-cup-straw"></i>
+      <div class="admin-state__title">Không có sản phẩm nào</div>
+      <p class="small mb-3">
+        <%= query.q || query.categoryId || query.status
+              ? 'Thử thay đổi từ khóa hoặc bộ lọc.'
+              : 'Hãy thêm sản phẩm đầu tiên cho cửa hàng.' %>
+      </p>
+      <a href="/admin/products/create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Thêm sản phẩm
+      </a>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width:60px;">Ảnh</th>
+            <th>Sản phẩm</th>
+            <th class="d-none d-md-table-cell">Danh mục</th>
+            <th class="text-end">Giá</th>
+            <th class="d-none d-sm-table-cell text-center">Tồn kho</th>
+            <th>Trạng thái</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% result.items.forEach(function (p) { %>
+            <tr>
+              <td>
+                <% if (p.image) { %>
+                  <img src="<%= p.image %>" alt="<%= p.name %>" class="admin-table__thumb"
+                       onerror="this.style.visibility='hidden'">
+                <% } else { %>
+                  <div class="admin-table__thumb d-flex align-items-center justify-content-center text-muted">
+                    <i class="bi bi-image"></i>
+                  </div>
+                <% } %>
+              </td>
+              <td>
+                <div class="fw-semibold"><%= p.name %></div>
+                <div class="text-muted small text-truncate" style="max-width:280px;">
+                  <%= p.description %>
+                </div>
+              </td>
+              <td class="d-none d-md-table-cell">
+                <% if (p.category) { %>
+                  <span class="badge bg-light text-secondary border"><%= p.category.name %></span>
+                <% } else { %>
+                  <span class="text-muted small">Chưa phân loại</span>
+                <% } %>
+              </td>
+              <td class="text-end fw-semibold text-danger"><%= formatMoney(p.price) %>đ</td>
+              <td class="d-none d-sm-table-cell text-center">
+                <span class="badge bg-<%= p.stock <= 0 ? 'danger' : (p.stock <= 10 ? 'warning' : 'light text-secondary border') %>">
+                  <%= p.stock %>
+                </span>
+              </td>
+              <td>
+                <!-- Bấm để bật/tắt nhanh trạng thái hiển thị -->
+                <form method="POST" action="/admin/products/<%= p.id %>/toggle" class="d-inline" data-no-loading>
+                  <button type="submit"
+                          class="btn btn-sm btn-<%= p.isActive ? 'success' : 'secondary' %> py-0 px-2"
+                          title="Bấm để <%= p.isActive ? 'ẩn' : 'hiển thị' %>">
+                    <%= p.isActive ? 'Đang bán' : 'Đã ẩn' %>
+                  </button>
+                </form>
+              </td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/products/<%= p.id %>/detail" class="btn btn-outline-secondary" title="Xem chi tiết">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="/admin/products/<%= p.id %>/edit" class="btn btn-outline-primary" title="Sửa">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="POST" action="/admin/products/<%= p.id %>/delete" class="d-inline"
+                        data-confirm="Xóa sản phẩm &quot;<%= p.name %>&quot;?">
+                    <button class="btn btn-outline-danger" type="submit" title="Xóa">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

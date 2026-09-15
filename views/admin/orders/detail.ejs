@@ -1,0 +1,147 @@
+<%- include('../partials/header', { pageTitle: 'Chi tiết đơn hàng #' + order.id }) %>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="/admin/orders" class="text-decoration-none">Đơn hàng</a></li>
+    <li class="breadcrumb-item active">#<%= order.id %></li>
+  </ol>
+</nav>
+
+<div class="row g-3">
+
+  <!-- Danh sách sản phẩm trong đơn -->
+  <div class="col-12 col-lg-8">
+    <div class="admin-card">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">
+          Đơn hàng #<%= order.id %>
+          <span class="badge bg-<%= statusColors[order.status] %> ms-1"><%= statusLabels[order.status] %></span>
+        </h2>
+        <span class="text-muted small"><%= formatDate(order.createdAt) %></span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">Ảnh</th>
+              <th>Sản phẩm</th>
+              <th class="text-end">Đơn giá</th>
+              <th class="text-center">SL</th>
+              <th class="text-end">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(function (item) { %>
+              <tr>
+                <td>
+                  <% if (item.productImage) { %>
+                    <img src="<%= item.productImage %>" alt="" class="admin-table__thumb"
+                         onerror="this.style.visibility='hidden'">
+                  <% } else { %>
+                    <div class="admin-table__thumb"></div>
+                  <% } %>
+                </td>
+                <td class="fw-semibold"><%= item.productName %></td>
+                <td class="text-end"><%= formatMoney(item.price) %>đ</td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end fw-semibold text-danger">
+                  <%= formatMoney(item.price * item.quantity) %>đ
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="text-end fw-bold">Tổng cộng</td>
+              <td class="text-end fw-bold text-danger fs-5"><%= formatMoney(order.total) %>đ</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông tin khách + cập nhật trạng thái -->
+  <div class="col-12 col-lg-4">
+    <div class="admin-card mb-3">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title"><i class="bi bi-person me-1"></i>Thông tin người nhận</h2>
+      </div>
+      <div class="admin-card__body small">
+        <div class="mb-2">
+          <div class="text-muted">Họ tên</div>
+          <div class="fw-semibold"><%= order.customerName %></div>
+        </div>
+        <div class="mb-2">
+          <div class="text-muted">Số điện thoại</div>
+          <div class="fw-semibold"><%= order.phone %></div>
+        </div>
+        <div class="mb-2">
+          <div class="text-muted">Địa chỉ giao hàng</div>
+          <div class="fw-semibold"><%= order.address %></div>
+        </div>
+        <div class="mb-2">
+          <div class="text-muted">Phương thức thanh toán</div>
+          <div class="fw-semibold">
+            <%= order.paymentMethod === 'bank' ? '🏦 Chuyển khoản' : '💵 Tiền mặt' %>
+          </div>
+        </div>
+        <% if (order.note) { %>
+          <div class="mb-2">
+            <div class="text-muted">Ghi chú</div>
+            <div><%= order.note %></div>
+          </div>
+        <% } %>
+        <div>
+          <div class="text-muted">Tài khoản đặt</div>
+          <div class="fw-semibold">
+            <% if (order.user) { %>
+              <a href="/admin/users/<%= order.user.id %>/detail" class="text-decoration-none">
+                @<%= order.user.username %>
+              </a>
+            <% } else { %>
+              <span class="text-muted">Khách vãng lai</span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card mb-3">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title"><i class="bi bi-arrow-repeat me-1"></i>Cập nhật trạng thái</h2>
+      </div>
+      <div class="admin-card__body">
+        <form method="POST" action="/admin/orders/<%= order.id %>/status">
+          <select name="status" class="form-select mb-3">
+            <% validStatuses.forEach(function (key) { %>
+              <option value="<%= key %>" <%= order.status === key ? 'selected' : '' %>>
+                <%= statusLabels[key] %>
+              </option>
+            <% }) %>
+          </select>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-check-lg me-1"></i>Lưu trạng thái
+          </button>
+        </form>
+        <p class="text-muted small mb-0 mt-2">
+          Chỉ đơn ở trạng thái <strong>Hoàn thành</strong> mới được tính vào doanh thu.
+        </p>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card__body">
+        <form method="POST" action="/admin/orders/<%= order.id %>/delete"
+              data-confirm="Xóa đơn hàng #<%= order.id %>? Toàn bộ chi tiết đơn sẽ bị xóa theo.">
+          <button type="submit" class="btn btn-outline-danger w-100">
+            <i class="bi bi-trash me-1"></i>Xóa đơn hàng
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

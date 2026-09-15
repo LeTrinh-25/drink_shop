@@ -1,0 +1,478 @@
+/* =========================================================
+   Drink Shop — Admin Panel
+   Bảng màu lấy tông xanh #5dade2 của footer trang bán hàng
+   để khu quản trị đồng bộ với phần còn lại của dự án.
+   ========================================================= */
+
+:root {
+  --admin-primary: #2f86c5;
+  --admin-primary-light: #5dade2;
+  --admin-sidebar-bg: #16233a;
+  --admin-sidebar-hover: #1f3050;
+  --admin-sidebar-text: #aebad0;
+  --admin-body-bg: #f3f5f9;
+  --admin-border: #e4e8f0;
+  --admin-radius: 12px;
+  --admin-sidebar-width: 256px;
+  --admin-sidebar-collapsed: 76px;
+  --admin-topbar-height: 62px;
+}
+
+body.admin-body {
+  background: var(--admin-body-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  color: #2b3445;
+  margin: 0;
+}
+
+/* ================= SIDEBAR ================= */
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--admin-sidebar-width);
+  background: var(--admin-sidebar-bg);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  transition: width 0.22s ease, transform 0.22s ease;
+  overflow: hidden;
+}
+
+.admin-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--admin-topbar-height);
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-sidebar__logo {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.admin-sidebar__title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+}
+
+.admin-sidebar__nav {
+  list-style: none;
+  margin: 0;
+  padding: 12px 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.admin-sidebar__section {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #61708c;
+  padding: 14px 12px 6px;
+  white-space: nowrap;
+}
+
+.admin-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
+  border-radius: 9px;
+  color: var(--admin-sidebar-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-sidebar__link i {
+  font-size: 17px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.admin-sidebar__link:hover {
+  background: var(--admin-sidebar-hover);
+  color: #fff;
+}
+
+.admin-sidebar__link:focus-visible {
+  outline: 2px solid var(--admin-primary-light);
+  outline-offset: 2px;
+}
+
+.admin-sidebar__link.is-active {
+  background: var(--admin-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin-sidebar__badge {
+  margin-left: auto;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 20px;
+  padding: 1px 7px;
+}
+
+.admin-sidebar__footer {
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+/* --- Trạng thái thu gọn (desktop) --- */
+
+body.sidebar-collapsed .admin-sidebar {
+  width: var(--admin-sidebar-collapsed);
+}
+
+body.sidebar-collapsed .admin-sidebar__title,
+body.sidebar-collapsed .admin-sidebar__section,
+body.sidebar-collapsed .admin-sidebar__label,
+body.sidebar-collapsed .admin-sidebar__badge {
+  display: none;
+}
+
+body.sidebar-collapsed .admin-sidebar__link {
+  justify-content: center;
+  padding: 11px 0;
+}
+
+body.sidebar-collapsed .admin-sidebar__brand {
+  justify-content: center;
+  padding: 0;
+}
+
+body.sidebar-collapsed .admin-main {
+  margin-left: var(--admin-sidebar-collapsed);
+}
+
+/* ================= KHUNG NỘI DUNG ================= */
+
+.admin-main {
+  margin-left: var(--admin-sidebar-width);
+  min-height: 100vh;
+  transition: margin-left 0.22s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-topbar {
+  height: var(--admin-topbar-height);
+  background: #fff;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.admin-topbar__toggle {
+  background: transparent;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  color: #4a5568;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.admin-topbar__toggle:hover {
+  background: var(--admin-body-bg);
+  color: var(--admin-primary);
+}
+
+.admin-topbar__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-content {
+  padding: 22px;
+  flex: 1;
+}
+
+/* ================= CARD & BẢNG ================= */
+
+.admin-card {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+.admin-card__header {
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.admin-card__body {
+  padding: 18px;
+}
+
+/* --- Thẻ số liệu Dashboard --- */
+
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 18px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
+}
+
+.stat-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 2px;
+}
+
+.stat-card__value {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.stat-card__hint {
+  font-size: 12px;
+  color: #8a95a8;
+  margin: 2px 0 0;
+}
+
+.bg-soft-primary { background: #e3f0fb; color: #2f86c5; }
+.bg-soft-success { background: #e2f6ec; color: #1e9e62; }
+.bg-soft-warning { background: #fdf2dd; color: #cc8a12; }
+.bg-soft-danger  { background: #fdeaea; color: #d64545; }
+.bg-soft-info    { background: #e7f0fd; color: #3f70c4; }
+.bg-soft-purple  { background: #efe9fb; color: #7a5bc4; }
+
+/* --- Bảng dữ liệu --- */
+
+.admin-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.admin-table thead th {
+  background: #fafbfd;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7789;
+  font-weight: 700;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  white-space: nowrap;
+}
+
+.admin-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f2f6;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background: #fafcff;
+}
+
+.admin-table__thumb {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eef1f6;
+}
+
+/* --- Trạng thái rỗng / lỗi --- */
+
+.admin-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: #7a8699;
+}
+
+.admin-state i {
+  font-size: 44px;
+  opacity: 0.35;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.admin-state__title {
+  font-weight: 700;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+/* --- Loading overlay khi submit form / chuyển trang --- */
+
+.admin-loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.72);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.admin-loading.is-visible {
+  display: flex;
+}
+
+/* --- Ô lọc --- */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.filter-bar .form-control,
+.filter-bar .form-select {
+  min-width: 140px;
+}
+
+/* --- Khác --- */
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--admin-primary-light);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.chart-box {
+  position: relative;
+  height: 300px;
+}
+
+.admin-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1035;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet: sidebar tự thu gọn thành dạng icon */
+@media (max-width: 1199.98px) and (min-width: 992px) {
+  .admin-sidebar { width: var(--admin-sidebar-collapsed); }
+  .admin-sidebar__title,
+  .admin-sidebar__section,
+  .admin-sidebar__label,
+  .admin-sidebar__badge { display: none; }
+  .admin-sidebar__link { justify-content: center; padding: 11px 0; }
+  .admin-sidebar__brand { justify-content: center; padding: 0; }
+  .admin-main { margin-left: var(--admin-sidebar-collapsed); }
+}
+
+/* Mobile: sidebar trượt ra từ bên trái */
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    width: var(--admin-sidebar-width);
+    transform: translateX(-100%);
+  }
+
+  body.sidebar-open .admin-sidebar { transform: translateX(0); }
+  body.sidebar-open .admin-backdrop { display: block; }
+
+  .admin-main,
+  body.sidebar-collapsed .admin-main { margin-left: 0; }
+
+  /* Ở mobile, nút toggle luôn mở/đóng chứ không thu gọn */
+  body.sidebar-collapsed .admin-sidebar__title,
+  body.sidebar-collapsed .admin-sidebar__section,
+  body.sidebar-collapsed .admin-sidebar__label { display: block; }
+
+  body.sidebar-collapsed .admin-sidebar__link {
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  body.sidebar-collapsed .admin-sidebar__brand {
+    justify-content: flex-start;
+    padding: 0 18px;
+  }
+
+  .admin-content { padding: 16px 12px; }
+  .filter-bar .form-control,
+  .filter-bar .form-select { min-width: 0; }
+}
+
+@media (max-width: 575.98px) {
+  .admin-topbar { padding: 0 12px; }
+  .admin-topbar__title { font-size: 14px; }
+  .stat-card { padding: 14px; gap: 11px; }
+  .stat-card__value { font-size: 19px; }
+  .stat-card__icon { width: 40px; height: 40px; font-size: 18px; }
+  .chart-box { height: 240px; }
+}

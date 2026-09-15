@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drink Shop - Menu</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
+      padding-top: 70px; /* tránh bị navbar che */
+    }
+
+    .navbar {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .hero {
+      background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)),
+        url("https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg") center/cover no-repeat;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    /* Container thanh tìm kiếm */
+.navbar .search-form {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+}
+
+/* Input tìm kiếm */
+.navbar .search-form input[type="search"] {
+  width: 200px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid #ced4da;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+/* Khi focus */
+.navbar .search-form input[type="search"]:focus {
+  outline: none;
+  border-color: #5dade2; /* màu xanh nhạt */
+  box-shadow: 0 0 5px rgba(93, 173, 226, 0.5);
+}
+
+/* Nút tìm kiếm */
+.navbar .search-form button {
+  margin-left: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background: #5dade2;
+  border: none;
+  color: white;
+  transition: 0.3s;
+}
+
+/* Hover nút tìm kiếm */
+.navbar .search-form button:hover {
+  background: #3498db;
+  color: white;
+  cursor: pointer;
+}
+
+
+    .product-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .product-card img {
+      height: 220px;
+      object-fit: cover;
+    }
+
+    footer {
+      background:#5dade2;
+      color: white;
+      padding: 30px 0;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">🍹 Drink Shop</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+<li class="nav-item me-2">
+  <form class="search-form d-flex" action="/products" method="GET">
+    <input type="search" name="q" placeholder="Tìm sản phẩm..." value="<%= q || '' %>">
+    <button type="submit">Tìm</button>
+  </form>
+</li>
+    <div id="menu" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        
+        <li class="nav-item"><a class="nav-link " href="/products">Trang Chủ</a></li>
+        <li class="nav-item"><a class="btn btn-warning ms-3" href="/cart">Giỏ hàng</a></li>
+
+        <!-- Nút đăng nhập/đăng ký hoặc đăng xuất -->
+        <% if (user) { %>
+          <% if (user.role === 'admin') { %>
+            <li class="nav-item ms-3">
+              <a class="btn btn-dark" href="/admin">Quản trị</a>
+            </li>
+          <% } %>
+          <li class="nav-item ms-3">
+            <a class="btn btn-danger" href="/auth/logout">Đăng xuất</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item ms-3">
+            <a class="btn btn-primary me-2" href="/auth/login">Đăng nhập</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-success" href="/auth/register">Đăng ký</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="text-center">
+    <h1 class="fw-bold">Menu Đồ Uống</h1>
+    <p>Tươi mát mỗi ngày – Ngon từng giọt</p>
+  </div>
+</section>
+
+<!-- ===== SẢN PHẨM ===== -->
+<div class="container py-5">
+
+  <!-- Lọc theo danh mục (dữ liệu từ bảng categories do Admin quản lý) -->
+  <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+      <a href="/products<%= q ? '?q=' + encodeURIComponent(q) : '' %>"
+         class="btn btn-sm <%= !activeCategory ? 'btn-primary' : 'btn-outline-primary' %>">Tất cả</a>
+      <% categories.forEach(c => { %>
+        <a href="/products?category=<%= c.id %><%= q ? '&q=' + encodeURIComponent(q) : '' %>"
+           class="btn btn-sm <%= activeCategory === c.id ? 'btn-primary' : 'btn-outline-primary' %>"><%= c.name %></a>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (!products.length) { %>
+    <div class="text-center text-muted py-5">
+      <h4>Không tìm thấy sản phẩm nào</h4>
+      <p class="mb-3">Hãy thử từ khóa khác hoặc xem tất cả đồ uống.</p>
+      <a href="/products" class="btn btn-warning">Xem tất cả</a>
+    </div>
+  <% } %>
+
+  <div class="row">
+
+    <% products.forEach(p => { %>
+      <div class="col-md-4 mb-4">
+        <div class="product-card">
+
+          <img src="<%= p.image %>" class="w-100">
+
+          <div class="p-4 text-center">
+            <h5 class="fw-bold"><%= p.name %></h5>
+            <p class="text-danger fw-bold"><%= p.price.toLocaleString() %> VNĐ</p>
+
+            <a href="/cart/add/<%= p.id %>" class="btn btn-warning w-100">
+              Thêm vào giỏ
+            </a>
+          </div>
+
+        </div>
+      </div>
+    <% }) %>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container text-center">
+    <p>📍 Địa chỉ: Đại Học Đông Á</p>
+    <p>📞 Hotline: 0123 456 789</p>
+    <p>© 2025 Drink Shop – Đồ án NestJS</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

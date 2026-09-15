@@ -1,0 +1,57 @@
+<%- include('../partials/header', { pageTitle: isEdit ? 'Sửa danh mục' : 'Thêm danh mục' }) %>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="/admin/categories" class="text-decoration-none">Danh mục</a></li>
+    <li class="breadcrumb-item active"><%= isEdit ? 'Chỉnh sửa' : 'Thêm mới' %></li>
+  </ol>
+</nav>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-7">
+    <div class="admin-card">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">
+          <i class="bi bi-tag me-1"></i><%= isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' %>
+        </h2>
+      </div>
+
+      <form method="POST"
+            action="<%= isEdit ? '/admin/categories/' + category.id + '/edit' : '/admin/categories/create' %>"
+            novalidate>
+        <div class="admin-card__body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small" for="name">
+              Tên danh mục <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="name" name="name"
+                   value="<%= category.name || '' %>" placeholder="Cà phê" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small" for="description">Mô tả</label>
+            <textarea class="form-control" id="description" name="description" rows="3"
+                      placeholder="Mô tả ngắn về danh mục..."><%= category.description || '' %></textarea>
+          </div>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch"
+                   id="isActive" name="isActive" <%= category.isActive ? 'checked' : '' %>>
+            <label class="form-check-label" for="isActive">
+              Hiển thị danh mục trên trang bán hàng
+            </label>
+          </div>
+        </div>
+
+        <div class="admin-card__body border-top d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i><%= isEdit ? 'Lưu thay đổi' : 'Thêm danh mục' %>
+          </button>
+          <a href="/admin/categories" class="btn btn-light">Hủy</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

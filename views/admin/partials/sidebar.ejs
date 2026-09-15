@@ -1,0 +1,72 @@
+<aside class="admin-sidebar">
+
+  <!-- Logo / tên hệ thống -->
+  <a class="admin-sidebar__brand text-decoration-none" href="/admin">
+    <span class="admin-sidebar__logo">🍹</span>
+    <span class="admin-sidebar__title">Drink Shop</span>
+  </a>
+
+  <ul class="admin-sidebar__nav">
+
+    <li class="admin-sidebar__section">Tổng quan</li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'dashboard' ? 'is-active' : '' %>" href="/admin" title="Dashboard">
+        <i class="bi bi-speedometer2"></i>
+        <span class="admin-sidebar__label">Dashboard</span>
+      </a>
+    </li>
+
+    <li class="admin-sidebar__section">Quản lý</li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'users' ? 'is-active' : '' %>" href="/admin/users" title="Người dùng">
+        <i class="bi bi-people"></i>
+        <span class="admin-sidebar__label">Người dùng</span>
+      </a>
+    </li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'products' ? 'is-active' : '' %>" href="/admin/products" title="Sản phẩm">
+        <i class="bi bi-cup-straw"></i>
+        <span class="admin-sidebar__label">Sản phẩm</span>
+      </a>
+    </li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'categories' ? 'is-active' : '' %>" href="/admin/categories" title="Danh mục">
+        <i class="bi bi-tags"></i>
+        <span class="admin-sidebar__label">Danh mục</span>
+      </a>
+    </li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'orders' ? 'is-active' : '' %>" href="/admin/orders" title="Đơn hàng">
+        <i class="bi bi-receipt"></i>
+        <span class="admin-sidebar__label">Đơn hàng</span>
+      </a>
+    </li>
+
+    <li class="admin-sidebar__section">Hệ thống</li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'statistics' ? 'is-active' : '' %>" href="/admin/statistics" title="Thống kê">
+        <i class="bi bi-bar-chart-line"></i>
+        <span class="admin-sidebar__label">Thống kê</span>
+      </a>
+    </li>
+    <li>
+      <a class="admin-sidebar__link <%= activeMenu === 'settings' ? 'is-active' : '' %>" href="/admin/settings" title="Cài đặt">
+        <i class="bi bi-gear"></i>
+        <span class="admin-sidebar__label">Cài đặt</span>
+      </a>
+    </li>
+    <li>
+      <a class="admin-sidebar__link" href="/" target="_blank" title="Xem trang bán hàng">
+        <i class="bi bi-box-arrow-up-right"></i>
+        <span class="admin-sidebar__label">Xem trang bán hàng</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="admin-sidebar__footer">
+    <a class="admin-sidebar__link" href="/admin/logout" title="Đăng xuất">
+      <i class="bi bi-box-arrow-left"></i>
+      <span class="admin-sidebar__label">Đăng xuất</span>
+    </a>
+  </div>
+</aside>

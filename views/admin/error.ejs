@@ -1,0 +1,21 @@
+<%- include('partials/header', { pageTitle: 'Đã xảy ra lỗi' }) %>
+
+<div class="admin-card">
+  <div class="admin-card__body">
+    <div class="admin-state">
+      <i class="bi bi-exclamation-octagon"></i>
+      <div class="admin-state__title"><%= message || 'Đã xảy ra lỗi không mong muốn.' %></div>
+      <% if (typeof detail !== 'undefined' && detail) { %>
+        <p class="small text-muted mb-3">Chi tiết: <code><%= detail %></code></p>
+      <% } %>
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="javascript:location.reload()" class="btn btn-primary btn-sm">
+          <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+        </a>
+        <a href="/admin" class="btn btn-outline-secondary btn-sm">Về Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

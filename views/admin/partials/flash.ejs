@@ -1,0 +1,18 @@
+<% if (typeof flash !== 'undefined' && flash) { %>
+  <div class="alert alert-<%= flash.type %> alert-dismissible fade show d-flex align-items-center" id="adminFlash" role="alert">
+    <i class="bi <%= flash.type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' %> me-2"></i>
+    <div><%= flash.message %></div>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Đóng"></button>
+  </div>
+<% } %>
+
+<% if (typeof errors !== 'undefined' && errors && errors.length) { %>
+  <div class="alert alert-danger" role="alert">
+    <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Vui lòng kiểm tra lại:</div>
+    <ul class="mb-0 ps-3">
+      <% errors.forEach(function (err) { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>

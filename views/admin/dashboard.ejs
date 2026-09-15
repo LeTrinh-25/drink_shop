@@ -1,0 +1,384 @@
+<%- include('partials/header', { pageTitle: 'Dashboard' }) %>
+
+<!-- ============ HÀNG THẺ SỐ LIỆU ============ -->
+<div class="row g-3 mb-3">
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-primary"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <p class="stat-card__label">Người dùng</p>
+        <p class="stat-card__value"><%= stats.totalUsers %></p>
+        <p class="stat-card__hint">+<%= stats.newUsers30d %> trong 30 ngày</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-info"><i class="bi bi-cup-straw"></i></div>
+      <div>
+        <p class="stat-card__label">Sản phẩm</p>
+        <p class="stat-card__value"><%= stats.totalProducts %></p>
+        <p class="stat-card__hint"><%= stats.totalCategories %> danh mục</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-warning"><i class="bi bi-receipt"></i></div>
+      <div>
+        <p class="stat-card__label">Đơn hàng</p>
+        <p class="stat-card__value"><%= stats.totalOrders %></p>
+        <p class="stat-card__hint"><%= stats.pendingOrders %> chờ xác nhận</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-success"><i class="bi bi-cash-coin"></i></div>
+      <div>
+        <p class="stat-card__label">Doanh thu</p>
+        <p class="stat-card__value"><%= formatMoney(stats.totalRevenue) %>đ</p>
+        <p class="stat-card__hint">Tháng này: <%= formatMoney(stats.revenueThisMonth) %>đ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HÀNG SỐ LIỆU PHỤ ============ -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-success"><i class="bi bi-calendar-check"></i></div>
+      <div>
+        <p class="stat-card__label">Doanh thu hôm nay</p>
+        <p class="stat-card__value"><%= formatMoney(stats.revenueToday) %>đ</p>
+        <p class="stat-card__hint"><%= stats.ordersToday %> đơn hôm nay</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-purple"><i class="bi bi-graph-up"></i></div>
+      <div>
+        <p class="stat-card__label">Giá trị đơn TB</p>
+        <p class="stat-card__value"><%= formatMoney(stats.averageOrderValue) %>đ</p>
+        <p class="stat-card__hint">Trên đơn hoàn thành</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-danger"><i class="bi bi-box-seam"></i></div>
+      <div>
+        <p class="stat-card__label">Hết hàng</p>
+        <p class="stat-card__value"><%= stats.outOfStock %></p>
+        <p class="stat-card__hint">sản phẩm tồn kho = 0</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-info"><i class="bi bi-shield-check"></i></div>
+      <div>
+        <p class="stat-card__label">Quản trị viên</p>
+        <p class="stat-card__value"><%= stats.totalAdmins %></p>
+        <p class="stat-card__hint">Tồn kho: <%= formatMoney(stats.inventoryValue) %>đ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BIỂU ĐỒ ============ -->
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-8">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Doanh thu 7 ngày gần nhất</h2>
+        <span class="badge bg-light text-secondary">Đơn đã hoàn thành</span>
+      </div>
+      <div class="admin-card__body">
+        <div class="chart-box"><canvas id="revenueChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Đơn hàng theo trạng thái</h2>
+      </div>
+      <div class="admin-card__body">
+        <div class="chart-box"><canvas id="statusChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-7">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Top 5 sản phẩm bán chạy</h2>
+        <a href="/admin/statistics" class="btn btn-sm btn-outline-primary">Xem báo cáo</a>
+      </div>
+      <div class="admin-card__body">
+        <% if (charts.topProducts.length === 0) { %>
+          <div class="admin-state">
+            <i class="bi bi-bar-chart"></i>
+            <div class="admin-state__title">Chưa có dữ liệu bán hàng</div>
+            <p class="small mb-0">Biểu đồ sẽ xuất hiện sau khi có đơn hàng đầu tiên.</p>
+          </div>
+        <% } else { %>
+          <div class="chart-box"><canvas id="topProductsChart"></canvas></div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-5">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Sản phẩm theo danh mục</h2>
+      </div>
+      <div class="admin-card__body">
+        <% if (charts.productsByCategory.length === 0) { %>
+          <div class="admin-state">
+            <i class="bi bi-pie-chart"></i>
+            <div class="admin-state__title">Chưa có sản phẩm</div>
+          </div>
+        <% } else { %>
+          <div class="chart-box"><canvas id="categoryChart"></canvas></div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BẢNG GẦN ĐÂY ============ -->
+<div class="row g-3">
+
+  <div class="col-12 col-xl-7">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Đơn hàng mới nhất</h2>
+        <a href="/admin/orders" class="btn btn-sm btn-outline-primary">Tất cả đơn</a>
+      </div>
+
+      <% if (recentOrders.length === 0) { %>
+        <div class="admin-state">
+          <i class="bi bi-receipt"></i>
+          <div class="admin-state__title">Chưa có đơn hàng nào</div>
+          <p class="small mb-0">Đơn hàng của khách sẽ hiển thị tại đây.</p>
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Khách hàng</th>
+                <th class="text-end">Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thời gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentOrders.forEach(function (o) { %>
+                <tr>
+                  <td><a class="fw-semibold text-decoration-none" href="/admin/orders/<%= o.id %>/detail">#<%= o.id %></a></td>
+                  <td>
+                    <div class="fw-semibold"><%= o.customerName %></div>
+                    <div class="text-muted small"><%= o.phone %></div>
+                  </td>
+                  <td class="text-end fw-semibold text-danger"><%= formatMoney(o.total) %>đ</td>
+                  <td>
+                    <%
+                      var colors = { pending:'warning', confirmed:'info', shipping:'primary', completed:'success', cancelled:'danger' };
+                      var labels = { pending:'Chờ xác nhận', confirmed:'Đã xác nhận', shipping:'Đang giao', completed:'Hoàn thành', cancelled:'Đã hủy' };
+                    %>
+                    <span class="badge bg-<%= colors[o.status] %>"><%= labels[o.status] %></span>
+                  </td>
+                  <td class="text-muted small"><%= formatDate(o.createdAt) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-5">
+    <div class="admin-card mb-3">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Người dùng mới</h2>
+        <a href="/admin/users" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+      </div>
+
+      <% if (recentUsers.length === 0) { %>
+        <div class="admin-state"><i class="bi bi-people"></i><div class="admin-state__title">Chưa có người dùng</div></div>
+      <% } else { %>
+        <div class="admin-card__body pt-2">
+          <% recentUsers.forEach(function (u) { %>
+            <div class="d-flex align-items-center gap-2 py-2 border-bottom">
+              <span class="avatar-circle"><%= (u.fullName || u.username).charAt(0) %></span>
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold text-truncate"><%= u.fullName || u.username %></div>
+                <div class="text-muted small text-truncate">@<%= u.username %></div>
+              </div>
+              <span class="badge bg-<%= u.role === 'admin' ? 'primary' : 'secondary' %>">
+                <%= u.role === 'admin' ? 'Admin' : 'User' %>
+              </span>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>Sắp hết hàng
+        </h2>
+      </div>
+
+      <% if (lowStockProducts.length === 0) { %>
+        <div class="admin-state">
+          <i class="bi bi-check-circle"></i>
+          <div class="admin-state__title">Tồn kho ổn định</div>
+        </div>
+      <% } else { %>
+        <div class="admin-card__body pt-2">
+          <% lowStockProducts.forEach(function (p) { %>
+            <div class="d-flex align-items-center gap-2 py-2 border-bottom">
+              <div class="flex-grow-1 min-w-0">
+                <a class="fw-semibold text-decoration-none text-truncate d-block"
+                   href="/admin/products/<%= p.id %>/edit"><%= p.name %></a>
+                <div class="text-muted small"><%= formatMoney(p.price) %>đ</div>
+              </div>
+              <span class="badge bg-<%= p.stock <= 0 ? 'danger' : 'warning' %>">
+                Còn <%= p.stock %>
+              </span>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Dữ liệu được server render sẵn dưới dạng JSON để Chart.js dùng trực tiếp
+  var CHART_DATA = <%- JSON.stringify(charts) %>;
+  var STATUS_COUNTS = <%- JSON.stringify(ordersByStatus) %>;
+
+  var moneyTick = function (value) {
+    if (value >= 1000000) return (value / 1000000) + 'tr';
+    if (value >= 1000) return (value / 1000) + 'k';
+    return value;
+  };
+
+  /* --- Biểu đồ đường: doanh thu 7 ngày --- */
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: CHART_DATA.revenueByDay.map(function (d) { return d.label; }),
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: CHART_DATA.revenueByDay.map(function (d) { return d.revenue; }),
+        borderColor: '#2f86c5',
+        backgroundColor: 'rgba(93,173,226,.18)',
+        fill: true,
+        tension: .35,
+        pointRadius: 4,
+        pointBackgroundColor: '#2f86c5'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { callback: moneyTick } } }
+    }
+  });
+
+  /* --- Biểu đồ tròn: đơn hàng theo trạng thái --- */
+  var statusMeta = [
+    { key: 'pending',   label: 'Chờ xác nhận', color: '#f0ad4e' },
+    { key: 'confirmed', label: 'Đã xác nhận',  color: '#5bc0de' },
+    { key: 'shipping',  label: 'Đang giao',    color: '#2f86c5' },
+    { key: 'completed', label: 'Hoàn thành',   color: '#28a745' },
+    { key: 'cancelled', label: 'Đã hủy',       color: '#dc3545' }
+  ];
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusMeta.map(function (s) { return s.label; }),
+      datasets: [{
+        data: statusMeta.map(function (s) { return STATUS_COUNTS[s.key] || 0; }),
+        backgroundColor: statusMeta.map(function (s) { return s.color; }),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } } }
+    }
+  });
+
+  /* --- Biểu đồ cột ngang: top sản phẩm --- */
+  if (document.getElementById('topProductsChart')) {
+    new Chart(document.getElementById('topProductsChart'), {
+      type: 'bar',
+      data: {
+        labels: CHART_DATA.topProducts.map(function (p) { return p.name; }),
+        datasets: [{
+          label: 'Số lượng đã bán',
+          data: CHART_DATA.topProducts.map(function (p) { return p.quantity; }),
+          backgroundColor: '#5dade2',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  }
+
+  /* --- Biểu đồ tròn: sản phẩm theo danh mục --- */
+  if (document.getElementById('categoryChart')) {
+    var palette = ['#2f86c5', '#5dade2', '#28a745', '#f0ad4e', '#7a5bc4', '#e74c3c', '#17a2b8', '#95a5a6'];
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'pie',
+      data: {
+        labels: CHART_DATA.productsByCategory.map(function (c) { return c.name; }),
+        datasets: [{
+          data: CHART_DATA.productsByCategory.map(function (c) { return c.count; }),
+          backgroundColor: CHART_DATA.productsByCategory.map(function (_, i) { return palette[i % palette.length]; }),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } } }
+      }
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

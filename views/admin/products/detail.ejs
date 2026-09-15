@@ -1,0 +1,81 @@
+<%- include('../partials/header', { pageTitle: 'Chi tiết sản phẩm' }) %>
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="/admin/products" class="text-decoration-none">Sản phẩm</a></li>
+    <li class="breadcrumb-item active"><%= product.name %></li>
+  </ol>
+</nav>
+
+<div class="row g-3">
+  <div class="col-12 col-md-5 col-lg-4">
+    <div class="admin-card">
+      <div class="admin-card__body">
+        <% if (product.image) { %>
+          <img src="<%= product.image %>" alt="<%= product.name %>"
+               class="img-fluid rounded w-100" style="object-fit:cover;max-height:320px;">
+        <% } else { %>
+          <div class="admin-state"><i class="bi bi-image"></i>
+            <div class="admin-state__title">Chưa có ảnh</div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-7 col-lg-8">
+    <div class="admin-card">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title"><%= product.name %></h2>
+        <div class="d-flex gap-2">
+          <a href="/admin/products/<%= product.id %>/edit" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i>Sửa
+          </a>
+          <form method="POST" action="/admin/products/<%= product.id %>/delete"
+                data-confirm="Xóa sản phẩm &quot;<%= product.name %>&quot;?">
+            <button class="btn btn-outline-danger btn-sm" type="submit">
+              <i class="bi bi-trash me-1"></i>Xóa
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="admin-card__body">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-sm-4">
+            <p class="stat-card__label">Giá bán</p>
+            <p class="h5 fw-bold text-danger mb-0"><%= formatMoney(product.price) %>đ</p>
+          </div>
+          <div class="col-6 col-sm-4">
+            <p class="stat-card__label">Tồn kho</p>
+            <p class="h5 fw-bold mb-0"><%= product.stock %></p>
+          </div>
+          <div class="col-6 col-sm-4">
+            <p class="stat-card__label">Trạng thái</p>
+            <span class="badge bg-<%= product.isActive ? 'success' : 'secondary' %>">
+              <%= product.isActive ? 'Đang bán' : 'Đã ẩn' %>
+            </span>
+          </div>
+        </div>
+
+        <hr>
+
+        <dl class="row mb-0 small">
+          <dt class="col-4 col-sm-3 text-muted fw-normal">ID</dt>
+          <dd class="col-8 col-sm-9">#<%= product.id %></dd>
+
+          <dt class="col-4 col-sm-3 text-muted fw-normal">Danh mục</dt>
+          <dd class="col-8 col-sm-9"><%= product.category ? product.category.name : 'Chưa phân loại' %></dd>
+
+          <dt class="col-4 col-sm-3 text-muted fw-normal">Ngày tạo</dt>
+          <dd class="col-8 col-sm-9"><%= formatDate(product.createdAt) %></dd>
+
+          <dt class="col-4 col-sm-3 text-muted fw-normal">Mô tả</dt>
+          <dd class="col-8 col-sm-9"><%= product.description %></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

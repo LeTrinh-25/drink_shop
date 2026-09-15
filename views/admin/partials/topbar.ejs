@@ -1,0 +1,33 @@
+<header class="admin-topbar">
+  <!-- Nút thu gọn (desktop) / mở sidebar (mobile) -->
+  <button class="admin-topbar__toggle" id="sidebarToggle" type="button" aria-label="Thu gọn menu">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <h1 class="admin-topbar__title"><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Quản trị' %></h1>
+
+  <div class="ms-auto dropdown">
+    <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-0 border-0"
+            data-bs-toggle="dropdown" type="button">
+      <span class="avatar-circle">
+        <%= (currentUser && (currentUser.fullName || currentUser.username) || '?').charAt(0) %>
+      </span>
+      <span class="d-none d-sm-inline text-dark fw-semibold">
+        <%= currentUser ? (currentUser.fullName || currentUser.username) : '' %>
+      </span>
+      <i class="bi bi-chevron-down text-muted small"></i>
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+      <li class="dropdown-header">
+        <%= currentUser ? currentUser.username : '' %>
+        <span class="badge bg-primary ms-1">Admin</span>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="/admin/settings"><i class="bi bi-gear me-2"></i>Cài đặt tài khoản</a></li>
+      <li><a class="dropdown-item" href="/" target="_blank"><i class="bi bi-shop me-2"></i>Trang bán hàng</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+    </ul>
+  </div>
+</header>

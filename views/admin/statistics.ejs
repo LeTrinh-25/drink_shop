@@ -1,0 +1,240 @@
+<%- include('partials/header', { pageTitle: 'Thống kê & Báo cáo' }) %>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <div>
+    <h2 class="h5 fw-bold mb-0">Báo cáo doanh thu</h2>
+    <p class="text-muted small mb-0">Chỉ tính các đơn hàng ở trạng thái “Hoàn thành”.</p>
+  </div>
+
+  <form method="GET" action="/admin/statistics" class="d-flex gap-2" data-no-loading>
+    <select name="year" class="form-select form-select-sm" style="width:auto;" data-auto-submit>
+      <% years.forEach(function (y) { %>
+        <option value="<%= y %>" <%= y === year ? 'selected' : '' %>>Năm <%= y %></option>
+      <% }) %>
+    </select>
+    <button class="btn btn-primary btn-sm" type="submit">Xem</button>
+  </form>
+</div>
+
+<!-- ===== Số liệu tổng hợp ===== -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-success"><i class="bi bi-cash-stack"></i></div>
+      <div>
+        <p class="stat-card__label">Doanh thu năm <%= year %></p>
+        <p class="stat-card__value"><%= formatMoney(yearRevenue) %>đ</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-primary"><i class="bi bi-cash-coin"></i></div>
+      <div>
+        <p class="stat-card__label">Tổng doanh thu</p>
+        <p class="stat-card__value"><%= formatMoney(totalRevenue) %>đ</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-warning"><i class="bi bi-receipt"></i></div>
+      <div>
+        <p class="stat-card__label">Tổng đơn hàng</p>
+        <p class="stat-card__value"><%= totalOrders %></p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card__icon bg-soft-purple"><i class="bi bi-graph-up-arrow"></i></div>
+      <div>
+        <p class="stat-card__label">Giá trị đơn TB</p>
+        <p class="stat-card__value"><%= formatMoney(averageOrderValue) %>đ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Biểu đồ theo tháng ===== -->
+<div class="admin-card mb-3">
+  <div class="admin-card__header">
+    <h2 class="admin-card__title">Doanh thu theo tháng — năm <%= year %></h2>
+  </div>
+  <div class="admin-card__body">
+    <div class="chart-box"><canvas id="monthChart"></canvas></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-7">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Doanh thu 30 ngày gần nhất</h2>
+      </div>
+      <div class="admin-card__body">
+        <div class="chart-box"><canvas id="day30Chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-5">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Tỉ trọng đơn theo trạng thái</h2>
+      </div>
+      <div class="admin-card__body">
+        <div class="chart-box"><canvas id="statusChart2"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Bảng top sản phẩm ===== -->
+<div class="row g-3">
+  <div class="col-12 col-xl-7">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Top 10 sản phẩm bán chạy</h2>
+      </div>
+
+      <% if (topProducts.length === 0) { %>
+        <div class="admin-state">
+          <i class="bi bi-bar-chart"></i>
+          <div class="admin-state__title">Chưa có dữ liệu bán hàng</div>
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width:48px;">#</th>
+                <th>Sản phẩm</th>
+                <th class="text-center">Đã bán</th>
+                <th class="text-end">Doanh thu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% topProducts.forEach(function (p, i) { %>
+                <tr>
+                  <td>
+                    <span class="badge bg-<%= i < 3 ? 'warning' : 'light text-secondary border' %>"><%= i + 1 %></span>
+                  </td>
+                  <td class="fw-semibold"><%= p.name %></td>
+                  <td class="text-center"><%= p.quantity %></td>
+                  <td class="text-end fw-semibold text-danger"><%= formatMoney(p.revenue) %>đ</td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-5">
+    <div class="admin-card h-100">
+      <div class="admin-card__header">
+        <h2 class="admin-card__title">Sản phẩm theo danh mục</h2>
+      </div>
+
+      <% if (productsByCategory.length === 0) { %>
+        <div class="admin-state">
+          <i class="bi bi-pie-chart"></i>
+          <div class="admin-state__title">Chưa có sản phẩm</div>
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Danh mục</th><th class="text-end">Số sản phẩm</th></tr>
+            </thead>
+            <tbody>
+              <% productsByCategory.forEach(function (c) { %>
+                <tr>
+                  <td class="fw-semibold"><%= c.name %></td>
+                  <td class="text-end"><%= c.count %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  var BY_MONTH = <%- JSON.stringify(revenueByMonth) %>;
+  var BY_DAY30 = <%- JSON.stringify(revenueByDay30) %>;
+  var STATUS_COUNTS = <%- JSON.stringify(ordersByStatus) %>;
+
+  var moneyTick = function (value) {
+    if (value >= 1000000) return (value / 1000000) + 'tr';
+    if (value >= 1000) return (value / 1000) + 'k';
+    return value;
+  };
+
+  new Chart(document.getElementById('monthChart'), {
+    type: 'bar',
+    data: {
+      labels: BY_MONTH.map(function (m) { return m.label; }),
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: BY_MONTH.map(function (m) { return m.revenue; }),
+        backgroundColor: '#2f86c5',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { callback: moneyTick } } }
+    }
+  });
+
+  new Chart(document.getElementById('day30Chart'), {
+    type: 'line',
+    data: {
+      labels: BY_DAY30.map(function (d) { return d.label; }),
+      datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: BY_DAY30.map(function (d) { return d.revenue; }),
+        borderColor: '#28a745',
+        backgroundColor: 'rgba(40,167,69,.15)',
+        fill: true, tension: .3, pointRadius: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { callback: moneyTick } } }
+    }
+  });
+
+  var statusMeta = [
+    { key: 'pending',   label: 'Chờ xác nhận', color: '#f0ad4e' },
+    { key: 'confirmed', label: 'Đã xác nhận',  color: '#5bc0de' },
+    { key: 'shipping',  label: 'Đang giao',    color: '#2f86c5' },
+    { key: 'completed', label: 'Hoàn thành',   color: '#28a745' },
+    { key: 'cancelled', label: 'Đã hủy',       color: '#dc3545' }
+  ];
+  new Chart(document.getElementById('statusChart2'), {
+    type: 'doughnut',
+    data: {
+      labels: statusMeta.map(function (s) { return s.label; }),
+      datasets: [{
+        data: statusMeta.map(function (s) { return STATUS_COUNTS[s.key] || 0; }),
+        backgroundColor: statusMeta.map(function (s) { return s.color; }),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } } }
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

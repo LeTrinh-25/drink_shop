@@ -1,0 +1,139 @@
+<%- include('../partials/header', { pageTitle: 'Quản lý người dùng' }) %>
+
+<div class="admin-card">
+  <div class="admin-card__header">
+    <h2 class="admin-card__title">
+      Người dùng <span class="badge bg-light text-secondary ms-1"><%= result.total %></span>
+    </h2>
+    <a href="/admin/users/create" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Thêm người dùng
+    </a>
+  </div>
+
+  <!-- ===== Tìm kiếm & lọc ===== -->
+  <div class="admin-card__body border-bottom">
+    <form class="filter-bar" method="GET" action="/admin/users" data-no-loading>
+      <div class="flex-grow-1" style="min-width:200px;">
+        <label class="form-label small text-muted mb-1">Tìm kiếm</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" name="q" value="<%= query.q || '' %>"
+                 placeholder="Tên đăng nhập, họ tên hoặc email...">
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Vai trò</label>
+        <select class="form-select form-select-sm" name="role" data-auto-submit>
+          <option value="">Tất cả</option>
+          <option value="admin" <%= query.role === 'admin' ? 'selected' : '' %>>Admin</option>
+          <option value="user"  <%= query.role === 'user'  ? 'selected' : '' %>>User</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label small text-muted mb-1">Trạng thái</label>
+        <select class="form-select form-select-sm" name="status" data-auto-submit>
+          <option value="">Tất cả</option>
+          <option value="active" <%= query.status === 'active' ? 'selected' : '' %>>Đang hoạt động</option>
+          <option value="locked" <%= query.status === 'locked' ? 'selected' : '' %>>Đã khóa</option>
+        </select>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a href="/admin/users" class="btn btn-light btn-sm">Xóa lọc</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== Danh sách ===== -->
+  <% if (result.items.length === 0) { %>
+    <div class="admin-state">
+      <i class="bi bi-person-x"></i>
+      <div class="admin-state__title">Không tìm thấy người dùng nào</div>
+      <p class="small mb-3">
+        <%= query.q || query.role || query.status
+              ? 'Thử thay đổi từ khóa hoặc bộ lọc.'
+              : 'Hệ thống chưa có người dùng nào.' %>
+      </p>
+      <a href="/admin/users/create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Thêm người dùng đầu tiên
+      </a>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Người dùng</th>
+            <th class="d-none d-md-table-cell">Liên hệ</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th class="d-none d-lg-table-cell">Ngày tạo</th>
+            <th class="text-end">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% result.items.forEach(function (u) { %>
+            <tr>
+              <td class="text-muted">#<%= u.id %></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="avatar-circle"><%= (u.fullName || u.username).charAt(0) %></span>
+                  <div class="min-w-0">
+                    <div class="fw-semibold text-truncate"><%= u.fullName || u.username %></div>
+                    <div class="text-muted small text-truncate">@<%= u.username %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="d-none d-md-table-cell small">
+                <% if (u.email) { %><div><i class="bi bi-envelope me-1 text-muted"></i><%= u.email %></div><% } %>
+                <% if (u.phone) { %><div><i class="bi bi-telephone me-1 text-muted"></i><%= u.phone %></div><% } %>
+                <% if (!u.email && !u.phone) { %><span class="text-muted">—</span><% } %>
+              </td>
+              <td>
+                <span class="badge bg-<%= u.role === 'admin' ? 'primary' : 'secondary' %>">
+                  <%= u.role === 'admin' ? 'Admin' : 'User' %>
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-<%= u.isActive ? 'success' : 'danger' %>">
+                  <%= u.isActive ? 'Hoạt động' : 'Đã khóa' %>
+                </span>
+              </td>
+              <td class="d-none d-lg-table-cell text-muted small"><%= formatDate(u.createdAt) %></td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/users/<%= u.id %>/detail" class="btn btn-outline-secondary" title="Xem chi tiết">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="/admin/users/<%= u.id %>/edit" class="btn btn-outline-primary" title="Sửa">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <% if (u.id !== currentUser.id) { %>
+                    <form method="POST" action="/admin/users/<%= u.id %>/delete" class="d-inline"
+                          data-confirm="Xóa người dùng &quot;<%= u.username %>&quot;? Dữ liệu tài khoản sẽ bị xóa vĩnh viễn.">
+                      <button class="btn btn-outline-danger" type="submit" title="Xóa">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <button class="btn btn-outline-secondary" disabled title="Không thể xóa chính mình">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

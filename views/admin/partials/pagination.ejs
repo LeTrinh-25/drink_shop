@@ -1,0 +1,57 @@
+<%
+/*
+ * Partial phân trang dùng chung.
+ * Yêu cầu: biến `result` (Paginated) và `query` (query string hiện tại),
+ * cùng helper buildQueryString đã được adminView truyền vào.
+ */
+var totalPages = result.totalPages;
+var current = result.page;
+
+// Chỉ hiện tối đa 5 số trang quanh trang hiện tại cho gọn
+var start = Math.max(1, current - 2);
+var end = Math.min(totalPages, start + 4);
+start = Math.max(1, end - 4);
+%>
+
+<% if (result.total > 0) { %>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 py-3 border-top">
+    <div class="text-muted small">
+      Hiển thị <strong><%= (current - 1) * result.limit + 1 %></strong>–<strong><%= Math.min(current * result.limit, result.total) %></strong>
+      trong tổng số <strong><%= result.total %></strong> bản ghi
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item <%= current === 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="<%= buildQueryString(query, { page: current - 1 }) %>" aria-label="Trang trước">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+
+          <% if (start > 1) { %>
+            <li class="page-item"><a class="page-link" href="<%= buildQueryString(query, { page: 1 }) %>">1</a></li>
+            <% if (start > 2) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+          <% } %>
+
+          <% for (var p = start; p <= end; p++) { %>
+            <li class="page-item <%= p === current ? 'active' : '' %>">
+              <a class="page-link" href="<%= buildQueryString(query, { page: p }) %>"><%= p %></a>
+            </li>
+          <% } %>
+
+          <% if (end < totalPages) { %>
+            <% if (end < totalPages - 1) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+            <li class="page-item"><a class="page-link" href="<%= buildQueryString(query, { page: totalPages }) %>"><%= totalPages %></a></li>
+          <% } %>
+
+          <li class="page-item <%= current === totalPages ? 'disabled' : '' %>">
+            <a class="page-link" href="<%= buildQueryString(query, { page: current + 1 }) %>" aria-label="Trang sau">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    <% } %>
+  </div>
+<% } %>
