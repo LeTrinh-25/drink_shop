@@ -105,10 +105,11 @@ The root `render.yaml` defines two Render services:
 - `drinkshop`: the NestJS API, built from the repository `Dockerfile`.
 - `drinkshop-frontend`: the React/Vite static site, built from `frontend/`.
 
-Create or update the Blueprint from this repository in Render. The frontend is
-configured to call `https://drinkshop.onrender.com`; the API allows the matching
-frontend origin and sets secure session cookies behind Render's HTTPS proxy.
-The API requires these environment values:
+Push the changes to the connected Git repository, then create or update its
+Blueprint in Render using `render.yaml`. The frontend is configured to call
+`https://drinkshop.onrender.com`; the API allows
+`https://drinkshop-frontend.onrender.com` and sets secure session cookies behind
+Render's HTTPS proxy. Confirm the API service has these environment values:
 
 - `DATABASE_URL`: the PostgreSQL connection URL for the Render or Supabase database.
 - `ADMIN_USERNAME` and `ADMIN_PASSWORD`: the initial admin credentials.
