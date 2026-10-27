@@ -1,6 +1,6 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -18,6 +18,7 @@ import { CartModule } from './cart/cart.module';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
 import { AdminModule } from './admin/admin.module';
+import { ApiModule } from './api/api.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,21 +27,66 @@ import { AdminMiddleware } from './admin/middlewares/admin.middleware';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      // Ưu tiên biến môi trường trong .env, giữ giá trị cũ làm mặc định
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306', 10),
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE || 'drink_shop_db',
-      entities: [User, Product, Cart, Category, Order, OrderItem],
-      synchronize: true, // tự tạo/cập nhật bảng cho các entity mới
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => {
+        const databaseUrl = config.get<string>('DATABASE_URL')?.trim();
+        const sslEnabled =
+          config.get<string>('DB_SSL')?.toLowerCase() === 'true' ||
+          !!databaseUrl?.includes('.supabase.co');
+        const commonOptions = {
+          entities: [User, Product, Cart, Category, Order, OrderItem],
+          synchronize: true,
+          ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+        };
+
+        if (databaseUrl) {
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            ...commonOptions,
+          };
+        }
+
+        const host = config.get<string>('DB_HOST')?.trim();
+        const username = config.get<string>('DB_USERNAME')?.trim();
+        const password = config.get<string>('DB_PASSWORD');
+        const database = config.get<string>('DB_DATABASE')?.trim();
+        const port = Number(config.get<string>('DB_PORT') || '5432');
+        const missingVariables = [
+          !host && 'DB_HOST',
+          !username && 'DB_USERNAME',
+          !password && 'DB_PASSWORD',
+          !database && 'DB_DATABASE',
+        ].filter(Boolean);
+
+        if (missingVariables.length > 0) {
+          throw new Error(
+            `Missing database configuration: ${missingVariables.join(', ')}. ` +
+              'Set DATABASE_URL or all required DB_* variables.',
+          );
+        }
+
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+          throw new Error('DB_PORT must be an integer between 1 and 65535.');
+        }
+
+        return {
+          type: 'postgres',
+          host,
+          port,
+          username,
+          password,
+          database,
+          ...commonOptions,
+        };
+      },
     }),
 
     UsersModule,
@@ -50,6 +96,7 @@ import { AdminMiddleware } from './admin/middlewares/admin.middleware';
     CategoriesModule,
     OrdersModule,
     AdminModule,
+    ApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

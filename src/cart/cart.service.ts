@@ -44,6 +44,11 @@ export class CartService {
     return this.cartRepository.delete(cartId);
   }
 
+  /** Xóa item khi user sở hữu item đó. */
+  async removeItemForUser(userId: number, cartId: number) {
+    return this.cartRepository.delete({ id: cartId, user_id: userId });
+  }
+
   // 🔼 / 🔽 Tăng giảm số lượng
   async updateQuantity(userId: number, productId: number, change: number) {
     const item = await this.cartRepository.findOne({

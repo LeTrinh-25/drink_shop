@@ -1,7 +1,7 @@
 services:
   - type: web
     name: drinkshop
-    env: docker
+    runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -9,15 +9,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        sync: false
-      - key: DB_USERNAME
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_DATABASE
+      - key: DATABASE_URL
         sync: false
       - key: ADMIN_USERNAME
         sync: false
@@ -25,3 +17,15 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
+      - key: FRONTEND_URL
+        value: https://drinkshop-frontend.onrender.com
+
+  - type: web
+    name: drinkshop-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://drinkshop.onrender.com

@@ -31,6 +31,30 @@
 $ npm install
 ```
 
+## Frontend and backend
+
+The project now has a separate React + Vite customer frontend in `frontend/` and
+the NestJS backend/API in the repository root. The frontend calls the backend
+through `/api`; the Vite development server proxies API and product image requests
+to port 3000. The customer storefront, login, cart, and checkout are in React.
+Existing EJS admin screens remain available during their migration.
+
+Run the backend and frontend in two terminals:
+
+```bash
+# Terminal 1, from the repository root
+npm run start:dev
+
+# Terminal 2, from the repository root
+npm --prefix frontend install
+npm --prefix frontend run dev
+```
+
+Open `http://localhost:5173`. The frontend uses the backend session cookie for
+login, cart, and checkout. For a separately hosted frontend, set `FRONTEND_URL`
+on the backend to its full origin and set `VITE_API_URL` in `frontend/.env` to
+the backend origin. HTTPS frontends use a secure cross-site session cookie.
+
 ## Compile and run the project
 
 ```bash
@@ -57,18 +81,44 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Deployment
+## Local Docker run
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Docker Compose runs the app and its local PostgreSQL database. The app connects to
+the Compose service hostname `db`; `DATABASE_URL` is not passed into the container.
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose up --build -d
+docker compose logs -f app
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Open `http://localhost:3000` to check the app. Stop the containers without deleting
+the database volume with:
+
+```bash
+docker compose down
+```
+
+## Deploy on Render
+
+The root `render.yaml` defines two Render services:
+
+- `drinkshop`: the NestJS API, built from the repository `Dockerfile`.
+- `drinkshop-frontend`: the React/Vite static site, built from `frontend/`.
+
+Create or update the Blueprint from this repository in Render. The frontend is
+configured to call `https://drinkshop.onrender.com`; the API allows the matching
+frontend origin and sets secure session cookies behind Render's HTTPS proxy.
+The API requires these environment values:
+
+- `DATABASE_URL`: the PostgreSQL connection URL for the Render or Supabase database.
+- `ADMIN_USERNAME` and `ADMIN_PASSWORD`: the initial admin credentials.
+- `SESSION_SECRET`: a long, random secret; the Blueprint generates one for a new service.
+
+Do not set a local Docker hostname such as `db` or `host.docker.internal` as
+Render's database host. When using `DATABASE_URL`, remove stale `DB_HOST` values
+from the Render service settings so the deployed service has one authoritative
+database connection configuration. If you use custom domains, update `FRONTEND_URL`
+on the API and `VITE_API_URL` on the frontend, then redeploy both services.
 
 ## Resources
 
