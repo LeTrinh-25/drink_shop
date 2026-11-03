@@ -6,13 +6,45 @@ type User = { id: number; username: string; fullName?: string; role: string };
 type CartItem = { id: number; product_id: number; quantity: number; product: Product };
 type Cart = { items: CartItem[]; total: number };
 
+const fallbackProducts: Product[] = [
+  ['7Up', 12000, '7up.jpg', 'Nước ngọt', 'Nước ngọt có gas vị chanh tươi mát.'],
+  ['Aquafina 500ml', 8000, 'aquafina.jpg', 'Nước suối', 'Nước uống tinh khiết đóng chai 500ml.'],
+  ['Bạc xỉu', 28000, 'bac-xiu.jpg', 'Cà phê', 'Cà phê sữa dịu nhẹ, thơm béo.'],
+  ['Cà phê đen', 22000, 'cafe-den.jpg', 'Cà phê', 'Cà phê đen đậm vị, thơm đặc trưng.'],
+  ['Cà phê sữa', 26000, 'cafe-sua.jpg', 'Cà phê', 'Cà phê hòa quyện cùng sữa ngọt béo.'],
+  ['Coca-Cola', 12000, 'coca.jpg', 'Nước ngọt', 'Nước ngọt có gas Coca-Cola mát lạnh.'],
+  ['Nước ép cam', 30000, 'ep-cam.jpg', 'Nước ép', 'Nước ép cam vị chua ngọt tự nhiên.'],
+  ['Nước ép dứa', 28000, 'ep-dua.jpg', 'Nước ép', 'Nước ép dứa thơm ngon, giải khát.'],
+  ['Nước ép ổi', 28000, 'ep-oi.jpg', 'Nước ép', 'Nước ép ổi thơm nhẹ, vị ngọt thanh.'],
+  ['Fanta cam', 12000, 'fanta.jpg', 'Nước ngọt', 'Nước ngọt có gas vị cam.'],
+  ['Heineken', 22000, 'heineken.jpg', 'Bia', 'Bia Heineken ướp lạnh.'],
+  ['Bia Huda', 16000, 'huda.jpg', 'Bia', 'Bia Huda đậm đà, mát lạnh.'],
+  ['Bia Larue', 16000, 'larue.jpg', 'Bia', 'Bia Larue sảng khoái.'],
+  ['LaVie 500ml', 8000, 'lavie.jpg', 'Nước suối', 'Nước khoáng thiên nhiên đóng chai 500ml.'],
+  ['Pepsi', 12000, 'pepsi.jpg', 'Nước ngọt', 'Nước ngọt có gas Pepsi mát lạnh.'],
+  ['Rượu vang đỏ', 280000, 'ruou-vang.jpg', 'Rượu', 'Rượu vang đỏ dùng trong những dịp đặc biệt.'],
+  ['Bia Saigon', 16000, 'saigon.jpg', 'Bia', 'Bia Saigon ướp lạnh, dễ uống.'],
+  ['Soju', 95000, 'soju.jpg', 'Rượu', 'Rượu Soju phong cách Hàn Quốc.'],
+  ['Sữa socola', 18000, 'sua-socola.jpg', 'Sữa', 'Sữa vị socola thơm ngon.'],
+  ['Sữa tươi', 16000, 'sua-tuoi.jpg', 'Sữa', 'Sữa tươi mát lành, dễ uống.'],
+  ['Trà chanh', 22000, 'tra-chanh.jpg', 'Trà & trà sữa', 'Trà chanh chua ngọt, giải khát.'],
+  ['Trà đào', 28000, 'tra-dao.jpg', 'Trà & trà sữa', 'Trà đào thơm dịu, vị ngọt thanh.'],
+  ['Trà sữa', 32000, 'tra-sua.jpg', 'Trà & trà sữa', 'Trà sữa béo thơm, pha mới mỗi ngày.'],
+  ['Tiger', 19000, 'tiger.jpg', 'Bia', 'Bia Tiger ướp lạnh.'],
+].map(([name, price, image, category, description], index) => ({
+  id: -(index + 1), name: String(name), price: Number(price), image: String(image),
+  description: String(description), category: { id: -(index + 1), name: String(category) },
+}));
+const fallbackCategories: Category[] = Array.from(new Set(fallbackProducts.map((p) => p.category!.name)))
+  .map((name, index) => ({ id: -(index + 1), name }));
+
 const money = (value: number) => `${Number(value || 0).toLocaleString('vi-VN')}₫`;
 const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 const imageUrl = (image?: string) => {
   if (!image) return '';
   if (image.startsWith('http')) return image;
   const path = image.startsWith('/') ? image : `/images/${image}`;
-  return `${API_URL}${path}`;
+  return path;
 };
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}/api${path}`, {
@@ -35,6 +67,7 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   const loadProducts = async () => {
     try {
@@ -42,8 +75,14 @@ export default function App() {
       if (search.trim()) params.set('q', search.trim());
       if (category) params.set('category', category);
       const data = await api<{ products: Product[]; categories: Category[] }>(`/products?${params}`);
-      setProducts(data.products); setCategories(data.categories);
-    } catch (error) { setNotice((error as Error).message); }
+      setProducts(data.products); setCategories(data.categories); setUsingFallback(false);
+    } catch {
+      const keyword = search.trim().toLocaleLowerCase('vi');
+      setProducts(fallbackProducts.filter((p) => (!category || String(p.category?.id) === category) &&
+        (!keyword || `${p.name} ${p.description} ${p.category?.name}`.toLocaleLowerCase('vi').includes(keyword))));
+      setCategories(fallbackCategories);
+      setUsingFallback(true);
+    }
   };
   const loadUser = async () => {
     const data = await api<{ user: User | null }>('/auth/me'); setUser(data.user);
@@ -94,7 +133,8 @@ export default function App() {
     {view === 'shop' && <main><section className="hero"><div className="hero-copy"><span className="eyebrow">TỪ QUẦY PHA ĐẾN TẬN TAY</span><h1>Một ngụm<br/><em>vui mỗi ngày.</em></h1><p>Chọn món bạn yêu thích. Chúng mình chuẩn bị thật chỉn chu và giao đến bạn.</p><button className="button button-lime" onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}>Khám phá menu <span>↘</span></button></div><div className="hero-art"><div className="sun"></div><div className="drink-cup"><div className="straw"></div><div className="cup-lid"></div><div className="cup-body"><div className="cup-foam"></div><span>GOOD<br/>MOOD</span></div></div><div className="art-caption">FRESHLY MADE<br/><b>JUST FOR YOU</b></div><span className="sparkle sparkle-one">✳</span><span className="sparkle sparkle-two">✳</span></div></section>
       <section id="menu" className="menu-section"><div className="section-heading"><div><span className="eyebrow">LỰA CHỌN CỦA BẠN</span><h2>Menu hôm nay</h2></div><label className="search"><span>⌕</span><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm món yêu thích" /></label></div>
         <div className="filters"><button className={!category ? 'chip selected' : 'chip'} onClick={() => setCategory('')}>Tất cả</button>{categories.map(c => <button key={c.id} className={category === String(c.id) ? 'chip selected' : 'chip'} onClick={() => setCategory(String(c.id))}>{c.name}</button>)}</div>
-        {products.length ? <div className="product-grid">{products.map((product, index) => <article className="product-card" key={product.id}><div className={`product-image image-${index % 4}`}>{product.image ? <img src={imageUrl(product.image)} alt={product.name}/> : <span className="cup-emoji">🥤</span>}<span className="category-tag">{product.category?.name || 'Món ngon'}</span></div><div className="product-info"><div><h3>{product.name}</h3><p>{product.description || 'Pha mới mỗi ngày, dành riêng cho bạn.'}</p></div><strong>{money(product.price)}</strong></div><button disabled={busy} className="add-button" onClick={() => user ? void add(product.id) : setView('login')}>Thêm vào giỏ <span>＋</span></button></article>)}</div> : <div className="empty-state">Chưa tìm thấy món phù hợp. Thử từ khóa khác nhé.</div>}
+        {usingFallback && <p className="catalog-note">Đang hiển thị menu mẫu. Các chức năng đặt hàng sẽ hoạt động khi máy chủ kết nối lại.</p>}
+        {products.length ? <div className="product-grid">{products.map((product, index) => <article className="product-card" key={product.id}><div className={`product-image image-${index % 4}`}>{product.image ? <img src={imageUrl(product.image)} alt={product.name}/> : <span className="cup-emoji">🥤</span>}<span className="category-tag">{product.category?.name || 'Món ngon'}</span></div><div className="product-info"><div><h3>{product.name}</h3><p>{product.description || 'Pha mới mỗi ngày, dành riêng cho bạn.'}</p></div><strong>{money(product.price)}</strong></div><button disabled={busy || usingFallback} className="add-button" onClick={() => user ? void add(product.id) : setView('login')}>{usingFallback ? 'Máy chủ đang tạm ngưng' : <>Thêm vào giỏ <span>＋</span></>}</button></article>)}</div> : <div className="empty-state">Chưa tìm thấy món phù hợp. Thử từ khóa khác nhé.</div>}
       </section></main>}
     {(view === 'login' || view === 'register') && <main className="form-wrap"><div className="form-aside"><span className="eyebrow">RẤT VUI ĐƯỢC GẶP BẠN</span><h1>Niềm vui<br/><em>đang chờ.</em></h1><p>Đăng nhập để lưu giỏ hàng và đặt món yêu thích nhanh hơn.</p><span className="big-cup">🥤</span></div><form className="panel form-panel" onSubmit={e => submitAuth(e, view as 'login' | 'register')}><span className="eyebrow">TÀI KHOẢN DRINKSHOP</span><h2>{view === 'login' ? 'Đăng nhập' : 'Tạo tài khoản'}</h2><label>Tên đăng nhập<input name="username" autoComplete="username" required /></label><label>Mật khẩu<input name="password" type="password" minLength={6} autoComplete={view === 'login' ? 'current-password' : 'new-password'} required /></label><button disabled={busy} className="button button-dark full">{view === 'login' ? 'Đăng nhập' : 'Đăng ký'}</button><p className="switch-form">{view === 'login' ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'} <button type="button" className="text-button" onClick={() => setView(view === 'login' ? 'register' : 'login')}>{view === 'login' ? 'Đăng ký ngay' : 'Đăng nhập'}</button></p></form></main>}
     {view === 'cart' && <main className="content-page"><span className="eyebrow">GIỎ HÀNG CỦA BẠN</span><h1>Chọn rồi thì <em>thưởng thức.</em></h1>{cart.items.length ? <div className="cart-layout"><div className="panel cart-list">{cart.items.map(item => <div className="cart-row" key={item.id}><img src={imageUrl(item.product.image)} alt=""/><div className="cart-name"><b>{item.product.name}</b><small>{money(item.product.price)}</small></div><div className="quantity"><button onClick={() => void run(async () => { await api(`/cart/items/${item.id}`, { method: 'PUT', body: JSON.stringify({ quantity: Math.max(1, item.quantity - 1) }) }); await loadCart(); })}>−</button><span>{item.quantity}</span><button onClick={() => void run(async () => { await api(`/cart/items/${item.id}`, { method: 'PUT', body: JSON.stringify({ quantity: item.quantity + 1 }) }); await loadCart(); })}>＋</button></div><b>{money(item.product.price * item.quantity)}</b><button className="remove" onClick={() => void run(async () => { await api(`/cart/items/${item.id}`, { method: 'DELETE' }); await loadCart(); })}>×</button></div>)}</div><aside className="panel summary"><h3>Tóm tắt đơn hàng</h3><div className="summary-line"><span>Tạm tính</span><b>{money(cart.total)}</b></div><div className="summary-line"><span>Giao hàng</span><span>Miễn phí</span></div><div className="summary-total"><span>Tổng cộng</span><b>{money(cart.total)}</b></div><button className="button button-dark full" onClick={() => setView('checkout')}>Tiến hành đặt hàng <span>→</span></button><button className="continue" onClick={() => setView('shop')}>← Tiếp tục chọn món</button></aside></div> : <div className="panel empty-cart"><span>🛍️</span><h2>Giỏ hàng đang trống</h2><p>Thêm vài món ngon để bắt đầu nhé.</p><button className="button button-dark" onClick={() => setView('shop')}>Xem menu</button></div>}</main>}
