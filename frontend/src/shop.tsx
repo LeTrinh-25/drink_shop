@@ -75,7 +75,15 @@ export default function App() {
       if (search.trim()) params.set('q', search.trim());
       if (category) params.set('category', category);
       const data = await api<{ products: Product[]; categories: Category[] }>(`/products?${params}`);
-      setProducts(data.products); setCategories(data.categories); setUsingFallback(false);
+      if (!data.products?.length) {
+        const keyword = search.trim().toLocaleLowerCase('vi');
+        setProducts(fallbackProducts.filter((p) => (!category || String(p.category?.id) === category) &&
+          (!keyword || `${p.name} ${p.description} ${p.category?.name}`.toLocaleLowerCase('vi').includes(keyword))));
+        setCategories(fallbackCategories);
+        setUsingFallback(true);
+      } else {
+        setProducts(data.products); setCategories(data.categories); setUsingFallback(false);
+      }
     } catch {
       const keyword = search.trim().toLocaleLowerCase('vi');
       setProducts(fallbackProducts.filter((p) => (!category || String(p.category?.id) === category) &&
@@ -85,8 +93,13 @@ export default function App() {
     }
   };
   const loadUser = async () => {
-    const data = await api<{ user: User | null }>('/auth/me'); setUser(data.user);
-    if (data.user) await loadCart();
+    try {
+      const data = await api<{ user: User | null }>('/auth/me'); setUser(data.user);
+      if (data.user) await loadCart();
+    } catch {
+      setUser(null);
+      setCart({ items: [], total: 0 });
+    }
   };
   const loadCart = async () => { try { setCart(await api<Cart>('/cart')); } catch { setCart({ items: [], total: 0 }); } };
 
