@@ -28,4 +28,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://drinkshop.onrender.com
+        value: https://drink-shop-3-5ove.onrender.com

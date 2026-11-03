@@ -36,10 +36,15 @@ import { AdminMiddleware } from './admin/middlewares/admin.middleware';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService): TypeOrmModuleOptions => {
-        const databaseUrl = config.get<string>('DATABASE_URL')?.trim();
+        const configuredUrl = config.get<string>('DATABASE_URL')?.trim();
+        const databaseName = config.get<string>('DB_DATABASE')?.trim();
+        // Accept a connection URL accidentally placed in DB_DATABASE as well.
+        const databaseUrl = configuredUrl ||
+          (databaseName?.match(/^postgres(?:ql)?:\/\//i) ? databaseName : undefined);
         const sslEnabled =
           config.get<string>('DB_SSL')?.toLowerCase() === 'true' ||
-          !!databaseUrl?.includes('.supabase.co');
+          !!databaseUrl?.includes('.supabase.co') ||
+          !!databaseUrl?.includes('.render.com');
         const commonOptions = {
           entities: [User, Product, Cart, Category, Order, OrderItem],
           synchronize: true,
@@ -57,7 +62,7 @@ import { AdminMiddleware } from './admin/middlewares/admin.middleware';
         const host = config.get<string>('DB_HOST')?.trim();
         const username = config.get<string>('DB_USERNAME')?.trim();
         const password = config.get<string>('DB_PASSWORD');
-        const database = config.get<string>('DB_DATABASE')?.trim();
+        const database = databaseUrl ? undefined : databaseName;
         const port = Number(config.get<string>('DB_PORT') || '5432');
         const missingVariables = [
           !host && 'DB_HOST',
