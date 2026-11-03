@@ -184,6 +184,8 @@
             <h5 class="fw-bold"><%= p.name %></h5>
             <p class="text-danger fw-bold"><%= p.price.toLocaleString() %> VNĐ</p>
 
+            <a href="/products/<%= p.id %>" class="btn btn-outline-primary w-100 mb-2">Xem chi ti&#7871;t</a>
+
             <a href="/cart/add/<%= p.id %>" class="btn btn-warning w-100">
               Thêm vào giỏ
             </a>

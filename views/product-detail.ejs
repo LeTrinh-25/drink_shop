@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= product.name %> | Drink Shop</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #f6f6f6; font-family: Arial, sans-serif; }
+    .detail-card { max-width: 1000px; margin: 56px auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 12px 40px #14213d18; }
+    .detail-photo { width: 100%; height: 100%; min-height: 430px; object-fit: cover; background: #f0f1ed; }
+    .detail-copy { padding: clamp(28px, 5vw, 64px); }
+    .detail-price { color: #df3545; font-size: 1.6rem; font-weight: 700; }
+    @media (max-width: 767px) { .detail-card { margin: 24px 12px; } .detail-photo { min-height: 280px; max-height: 360px; } }
+  </style>
+</head>
+<body>
+  <nav class="navbar bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/products">🥤 Drink Shop</a>
+      <a class="btn btn-outline-secondary" href="/products">← Quay lại menu</a>
+    </div>
+  </nav>
+  <main class="container">
+    <article class="detail-card row g-0">
+      <div class="col-md-6">
+        <% if (product.image) { %>
+          <img class="detail-photo" src="<%= product.image %>" alt="<%= product.name %>">
+        <% } else { %>
+          <div class="detail-photo" style="display:grid;place-items:center;font-size:5rem">🥤</div>
+        <% } %>
+      </div>
+      <div class="col-md-6 detail-copy">
+        <p class="text-uppercase text-secondary small mb-2"><%= product.category?.name || 'Đồ uống' %></p>
+        <h1 class="fw-bold mb-3"><%= product.name %></h1>
+        <p class="detail-price"><%= Number(product.price).toLocaleString('vi-VN') %> ₫</p>
+        <p class="text-secondary lh-lg"><%= product.description || 'Đồ uống thơm ngon, sẵn sàng phục vụ bạn.' %></p>
+        <div class="d-grid gap-2 mt-4">
+          <a class="btn btn-warning btn-lg" href="/cart/add/<%= product.id %>">Thêm vào giỏ hàng</a>
+          <a class="btn btn-outline-secondary" href="/products">Tiếp tục xem menu</a>
+        </div>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

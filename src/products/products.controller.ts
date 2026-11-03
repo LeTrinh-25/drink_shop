@@ -1,4 +1,13 @@
-import { Controller, Get, Res, Req, Param, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  NotFoundException,
+  Res,
+  Req,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CategoriesService } from '../categories/categories.service';
 
@@ -30,6 +39,22 @@ export class ProductsController {
       activeCategory: Number.isNaN(categoryId) ? null : categoryId,
       user: req.session.user || null, // Navbar
       q: q || '', // Truyền lại giá trị tìm kiếm
+    });
+  }
+
+  @Get('/:id')
+  async showProductDetail(@Param('id') id: string, @Req() req, @Res() res) {
+    const productId = Number(id);
+    if (!Number.isInteger(productId) || productId < 1) {
+      throw new BadRequestException('Invalid product id');
+    }
+
+    const product = await this.productService.getActiveById(productId);
+    if (!product) throw new NotFoundException('Product not found');
+
+    return res.render('product-detail', {
+      product,
+      user: req.session.user || null,
     });
   }
 
