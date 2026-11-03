@@ -57,7 +57,7 @@ export class AdminService implements OnModuleInit {
     );
 
     this.logger.warn(
-      `Đã tạo tài khoản Admin mặc định -> username: ${username} / password: ${password}. Hãy đổi mật khẩu ngay sau khi đăng nhập.`,
+      `Đã tạo tài khoản Admin mặc định -> username: ${username}. Hãy đổi mật khẩu ngay sau khi đăng nhập.`,
     );
   }
 

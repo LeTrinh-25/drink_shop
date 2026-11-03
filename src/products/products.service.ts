@@ -152,7 +152,7 @@ export class ProductsService {
       .select('COALESCE(c.name, :none)', 'name')
       .addSelect('COUNT(p.id)', 'count')
       .setParameter('none', 'Chưa phân loại')
-      .groupBy('name')
+      .groupBy('COALESCE(c.name, :none)')
       .orderBy('count', 'DESC')
       .getRawMany<{ name: string; count: string }>();
 
