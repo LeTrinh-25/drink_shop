@@ -11,6 +11,7 @@ import {
   Req,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { CartService } from '../cart/cart.service';
@@ -41,6 +42,18 @@ export class ApiController {
       this.categories.findActive(),
     ]);
     return { products, categories };
+  }
+
+  @Get('products/:id')
+  async getProduct(@Param('id') id: string) {
+    const productId = Number(id);
+    if (!Number.isInteger(productId) || productId < 1) {
+      throw new BadRequestException('Invalid product id');
+    }
+
+    const product = await this.products.getActiveById(productId);
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 
   @Get('auth/me')

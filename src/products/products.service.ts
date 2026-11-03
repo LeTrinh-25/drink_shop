@@ -46,6 +46,13 @@ export class ProductsService {
     });
   }
 
+  async getActiveById(id: number): Promise<Product | null> {
+    return this.productRepository.findOne({
+      where: { id, isActive: true },
+      relations: ['category'],
+    });
+  }
+
   create(data: Partial<Product>) {
     return this.productRepository.save(data);
   }
